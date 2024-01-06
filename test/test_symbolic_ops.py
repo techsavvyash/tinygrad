@@ -2,6 +2,7 @@ import unittest
 from tinygrad.shape.symbolic import Variable
 from tinygrad.helpers import getenv
 from tinygrad.tensor import Tensor
+from examples.gpt2 import Attention
 import numpy as np
 
 @unittest.skipIf(getenv("ARM64") or getenv("PTX"), "ARM64 and PTX are not supported")
@@ -45,6 +46,12 @@ class TestSymbolicOps(unittest.TestCase):
       symbolic = f(q, k.reshape(2, vi, 4, 8), v.reshape(2, vi, 4, 8)).reshape(2, 4, 1, 8).numpy()
       expected = f(q, k, v).numpy()
       np.testing.assert_allclose(symbolic, expected, atol=1e-6, rtol=1e-6)
+
+  def test_attention_pos_0_sz_1(self):
+    Attention(128, 8)(Tensor.ones(1, 1, 128), Variable("start_pos", 0, 128).bind(0), None)
+
+  def test_attention_pos_0_sz_2(self):
+    Attention(128, 8)(Tensor.ones(1, 2, 128), Variable("start_pos", 0, 128).bind(0), None)
 
   @unittest.skipIf(getenv("MOCKHIP"), "MOCKHIP only compiles and does not run")
   def test_attention_training(self):

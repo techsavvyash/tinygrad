@@ -48,6 +48,7 @@ class Transformer:
       self.tbs.append(TransformerBlock(embed_dim, num_heads, ff_dim))
     self.final = Tensor.scaled_uniform(embed_dim, syms)
 
+  def __call__(self, x): return self.forward(x)
   def forward(self, x):
     bs = x.shape[0]
     xnp = x.numpy().astype(np.int32)
