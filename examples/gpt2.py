@@ -44,6 +44,7 @@ class Attention:
       new_cache = Tensor.stack([keys, values]).pad((None, None,(0,MAX_CONTEXT-start_pos-seqlen),None,None)).contiguous()
       self.cache_kv.assign(new_cache).realize()
     else:
+      assert (mask is not None and start_pos == 0) or start_pos.val == 0
       keys, values = xk, xv
 
     xq, keys, values = xq.transpose(1, 2), keys.transpose(1, 2), values.transpose(1, 2)
