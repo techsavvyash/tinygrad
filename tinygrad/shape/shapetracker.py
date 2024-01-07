@@ -113,7 +113,19 @@ class ShapeTracker:
     # TODO: fix symbolic to remove this. this fixes GPT-2 with pos=0, seqlen=1
     # NOTE: this is fast though, and probably covers a lot of multiview cases
     if len(self.views) == 2 and self.views[-1].contiguous is True and (cc := get_contraction(self.views[0].shape, self.views[1].shape)):
-      return tuple([self.views[0].strides[c[-1]] if len(c) else 0 for c in cc])
+      ret = []
+      for c in cc:
+        if len(c) == 0: ret.append(0)
+        elif len(c) == 1:
+          ret.append(self.views[0].strides[c[-1]])
+        else:
+          astrides = [(self.views[0].shape[x], self.views[0].strides[x]) for x in c if self.views[0].shape[x] != 1]
+          if len(astrides) == 1:
+            ret.append(astrides[0][1])
+          else:
+            # TODO: there's more cases here
+            ret.append(None)
+      return tuple(ret)
     idxs: List[Node] = [Variable(f"idx{i}", 0, s-1) for i,s in enumerate(self.shape)]
     idx, valid = self.expr_idxs(idxs)
     ret: List[Optional[sint]] = [None] * len(self.views[-1].shape)
