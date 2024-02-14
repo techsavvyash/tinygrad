@@ -25,3 +25,14 @@ We keep the frontend (Tensor -> LazyBuffer): tensor.py + mlops.py + lazy.py + dt
 We keep the shapetracker/symbolic (part of the frontend): shapetracker.py + view.py + symbolic.py = 603 lines
 Codegen is all rewritten. realize.py is simpler with the new codegen
 We keep the backend (uops renderer/runtime): cstyle.py/llvmir.py + device.py + ops_*.py = 1216 lines (less when we remove interpreted)
+
+== Goals for new Linearizer ==
+
+The entire network should be able to be compiled to one kernel.
+Not in a smart way (because you have to load everything), but it's possible and tests the correctness of the implementation.
+
+* multioutput, `List[LazyOp]` (or use something like SYNC to merge them)
+* multireduce, push shapetrackers through reduces
+* fix pad pushing with intermediate WHERE insertion
+
+NOTE: instead of reduce, consider an allreduce and make the dim have stride 0. Then they all have the same shape
